@@ -59,10 +59,16 @@ User Question:
 """
 
     # Generate SQL
-    response = client.models.generate_content(
+    try:
+       response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt
     )
+    except Exception as e:
+     return {
+        "error": str(e)
+    }
+    
 
     sql = response.text.strip()
 
@@ -117,11 +123,16 @@ User Question:
     try:
         cursor.execute(sql)
         result = cursor.fetchall()
+
+    except Exception as e:
+        return {
+            "sql": sql,
+            "error": str(e)
+        }
+
     finally:
         cursor.close()
-        conn.close()
-       # Explain result using Gemini
-    
+        conn.close()        
 
     explain_prompt = f"""
     You are an AI Job Market Analyst.

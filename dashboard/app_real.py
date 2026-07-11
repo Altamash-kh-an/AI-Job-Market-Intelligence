@@ -70,16 +70,22 @@ if st.button("🚀 Ask AI", use_container_width=True):
 
     with st.spinner("🤖 AI is analyzing..."):
 
-        response = requests.post(
-           f"{API_URL}/ai/chat",
-            json={"question": question}
-        )
+       response = requests.post(
+    f"{API_URL}/ai/chat",
+    json={"question": question}
+    )
 
-        answer = response.json()
+    answer = response.json()
 
-    st.chat_message("assistant").write(answer["answer"])
+    if "answer" in answer:
+        st.chat_message("assistant").write(answer["answer"])
 
-st.markdown("</div>", unsafe_allow_html=True)
+    elif "error" in answer:
+        st.error(answer["error"])
+
+    else:
+        st.write(answer)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 @st.cache_data(ttl=300)
 def load_jobs():
