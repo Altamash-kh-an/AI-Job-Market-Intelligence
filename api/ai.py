@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from google import genai
-from api.database import cursor
+from api.database import get_connection
 import re
 import os
 from dotenv import load_dotenv
@@ -110,10 +110,16 @@ User Question:
 }
     
     # Execute SQL
-    cursor.execute(sql)
+    # Execute SQL
+    conn = get_connection()
+    cursor = conn.cursor()
 
-    result = cursor.fetchall()
-
+    try:
+        cursor.execute(sql)
+        result = cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
        # Explain result using Gemini
     
 
