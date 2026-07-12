@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
-
+import logging
 import os
 from dotenv import load_dotenv
 
@@ -87,26 +87,34 @@ if st.button("🚀 Ask AI", use_container_width=True):
         st.write(answer)
     st.markdown("</div>", unsafe_allow_html=True)
 
-@st.cache_data(ttl=300)
+
+
+
+logger = logging.getLogger(__name__)
+
 @st.cache_data(ttl=300)
 def load_jobs():
 
-    print("STEP 1: Calling API")
+    logger.warning("STEP 1")
 
     response = requests.get(f"{API_URL}/jobs", timeout=60)
 
-    print("STEP 2:", response.status_code)
+    logger.warning(f"STEP 2 {response.status_code}")
 
     data = response.json()
 
-    print("STEP 3: Records =", len(data))
+    logger.warning(f"STEP 3 {len(data)}")
 
     return pd.DataFrame(data)
-print("STEP 4")
+
+
+logger.warning("STEP 4")
+
 df = load_jobs()
 
-print("STEP 5")
-df = load_jobs()
+logger.warning("STEP 5")
+
+
 df.index = df.index + 1
 location = st.sidebar.selectbox(
     "Select Location",
