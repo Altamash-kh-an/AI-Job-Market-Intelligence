@@ -103,6 +103,8 @@ def load_jobs():
     st.write("Total Records:", len(data))
 
     return pd.DataFrame(data)
+df = load_jobs()
+df.index = df.index + 1
 location = st.sidebar.selectbox(
     "Select Location",
     ["All"] + sorted(df["location"].unique())
