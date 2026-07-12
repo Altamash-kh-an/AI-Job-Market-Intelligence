@@ -92,7 +92,7 @@ if st.button("🚀 Ask AI", use_container_width=True):
 
 logger = logging.getLogger(__name__)
 
-@st.cache_data(ttl=300)
+# @st.cache_data(ttl=300)
 def load_jobs():
 
     logger.warning("STEP 1")
@@ -107,12 +107,9 @@ def load_jobs():
 
     return pd.DataFrame(data)
 
-
-logger.warning("STEP 4")
-
 df = load_jobs()
 
-logger.warning("STEP 5")
+
 
 
 df.index = df.index + 1
