@@ -90,14 +90,19 @@ if st.button("🚀 Ask AI", use_container_width=True):
 @st.cache_data(ttl=300)
 def load_jobs():
 
-    response = requests.get(f"{API_URL}/jobs")
+    st.write("Calling API...")
 
-    return pd.DataFrame(response.json())
+    response = requests.get(f"{API_URL}/jobs", timeout=60)
 
+    st.write("Status Code:", response.status_code)
 
-df = load_jobs()
-df.index = df.index + 1
+    st.write("Response Size:", len(response.text))
 
+    data = response.json()
+
+    st.write("Total Records:", len(data))
+
+    return pd.DataFrame(data)
 location = st.sidebar.selectbox(
     "Select Location",
     ["All"] + sorted(df["location"].unique())
