@@ -106,38 +106,49 @@ def load_jobs():
     logger.warning(f"STEP 3 {len(data)}")
 
     return pd.DataFrame(data)
-
 df = load_jobs()
 
-
-
+logger.warning("A")
 
 df.index = df.index + 1
+
+logger.warning("B")
+
 location = st.sidebar.selectbox(
     "Select Location",
     ["All"] + sorted(df["location"].unique())
 )
 
+logger.warning("C")
+
 if location != "All":
     df = df[df["location"] == location]
 
+logger.warning("D")
 
 company = st.sidebar.selectbox(
     "Select Company",
     ["All"] + sorted(df["company_name"].dropna().unique())
 )
 
+logger.warning("E")
+
 if company != "All":
     df = df[df["company_name"] == company]
 
+logger.warning("F")
 
 job_role = st.sidebar.selectbox(
     "Select Job Role",
     ["All"] + sorted(df["job_roles"].unique())
 )
 
+logger.warning("G")
+
 if job_role != "All":
     df = df[df["job_roles"] == job_role]
+
+logger.warning("H")
 
 
 search = st.sidebar.text_input("Search Job Title")
