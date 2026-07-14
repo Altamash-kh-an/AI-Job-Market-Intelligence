@@ -95,15 +95,15 @@ logger = logging.getLogger(__name__)
 # @st.cache_data(ttl=300)
 def load_jobs():
 
-    logger.warning("STEP 1")
-
     response = requests.get(f"{API_URL}/jobs", timeout=60)
 
-    logger.warning(f"STEP 2 {response.status_code}")
+    logger.warning(f"Status = {response.status_code}")
+
+    logger.warning(response.text[:500])   # sirf first 500 characters
+
+    response.raise_for_status()
 
     data = response.json()
-
-    logger.warning(f"STEP 3 {len(data)}")
 
     return pd.DataFrame(data)
 df = load_jobs()
