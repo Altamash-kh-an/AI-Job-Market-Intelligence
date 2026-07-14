@@ -175,7 +175,7 @@ st.divider()
 
 
 st.subheader("PAN India Jobs Data")
-st.dataframe(df)
+#st.dataframe(df)
 
 
 
