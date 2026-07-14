@@ -93,19 +93,32 @@ if st.button("🚀 Ask AI", use_container_width=True):
 logger = logging.getLogger(__name__)
 
 # @st.cache_data(ttl=300)
-def load_jobs():
 
-    response = requests.get(f"{API_URL}/jobs", timeout=60)
 
-    logger.warning(f"Status = {response.status_code}")
+@router.get("/jobs")
+def get_jobs():
 
-    logger.warning(response.text[:500])   # sirf first 500 characters
+    conn = get_connection()
+    cursor = conn.cursor()
 
-    response.raise_for_status()
+    try:
+        cursor.execute("""
+            SELECT *
+            FROM pan_india_jobs
+            LIMIT 1000
+        """)
 
-    data = response.json()
+        columns = [desc[0] for desc in cursor.description]
+        rows = cursor.fetchall()
 
-    return pd.DataFrame(data)
+        jobs = [dict(zip(columns, row)) for row in rows]
+
+        return jobs
+
+    finally:
+        cursor.close()
+        conn.close()
+
 df = load_jobs()
 
 logger.warning("A")
