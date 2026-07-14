@@ -94,31 +94,21 @@ logger = logging.getLogger(__name__)
 
 # @st.cache_data(ttl=300)
 
+def load_jobs():
 
-@router.get("/jobs")
-def get_jobs():
+    response = requests.get(f"{API_URL}/jobs", timeout=60)
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    logger.warning(f"Status = {response.status_code}")
 
-    try:
-        cursor.execute("""
-            SELECT *
-            FROM pan_india_jobs
-            LIMIT 1000
-        """)
+    logger.warning(response.text[:500])   # sirf first 500 characters
 
-        columns = [desc[0] for desc in cursor.description]
-        rows = cursor.fetchall()
+    response.raise_for_status()
 
-        jobs = [dict(zip(columns, row)) for row in rows]
+    data = response.json()
 
-        return jobs
+    return pd.DataFrame(data)
 
-    finally:
-        cursor.close()
-        conn.close()
-
+   
 df = load_jobs()
 
 logger.warning("A")
