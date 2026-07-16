@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
-import logging
+
 import os
 from dotenv import load_dotenv
 
@@ -62,96 +62,120 @@ st.markdown(
 )
 
 question = st.text_input(
-    "",
-    placeholder="Example: Highest paying job in Bangalore"
+    "Ask AI",
+    placeholder="Example: Highest paying job in Bangalore",
+    label_visibility="collapsed"
 )
-
 if st.button("🚀 Ask AI", use_container_width=True):
+
+    if not question.strip():
+        st.warning("Please enter a question.")
+        st.stop()
 
     with st.spinner("🤖 AI is analyzing..."):
 
-       response = requests.post(
-    f"{API_URL}/ai/chat",
-    json={"question": question}
-    )
+        try:
+            response = requests.post(
+                f"{API_URL}/ai/chat",
+                json={"question": question},
+                timeout=60
+            )
 
-    answer = response.json()
+            response.raise_for_status()
 
-    if "answer" in answer:
-        st.chat_message("assistant").write(answer["answer"])
+            answer = response.json()
 
-    elif "error" in answer:
-        st.error(answer["error"])
+            if "answer" in answer:
+                st.chat_message("assistant").write(answer["answer"])
 
-    else:
-        st.write(answer)
-    st.markdown("</div>", unsafe_allow_html=True)
+            elif "error" in answer:
+                st.error(answer["error"])
+
+            else:
+                st.write(answer)
+
+        except requests.exceptions.RequestException as e:
+            st.error(f"API Error: {e}")
+
+        except ValueError:
+            st.error("Invalid response received from API.")
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 
 
 
-logger = logging.getLogger(__name__)
 
-# @st.cache_data(ttl=300)
 
+@st.cache_data(ttl=300)
 def load_jobs():
 
-    response = requests.get(f"{API_URL}/jobs", timeout=60)
+    try:
+        response = requests.get(
+            f"{API_URL}/jobs",
+            timeout=60
+        )
 
-    logger.warning(f"Status = {response.status_code}")
+        response.raise_for_status()
 
-    logger.warning(response.text[:500])   # sirf first 500 characters
+        data = response.json()
 
-    response.raise_for_status()
+        return pd.DataFrame(data)
 
-    data = response.json()
+    except requests.exceptions.Timeout:
+        st.error("Request timed out while connecting to the backend.")
+        st.stop()
 
-    return pd.DataFrame(data)
+    except requests.exceptions.ConnectionError:
+        st.error("Unable to connect to the backend API.")
+        st.stop()
 
+    except requests.exceptions.HTTPError as e:
+        st.error(f"HTTP Error: {e}")
+        st.stop()
+
+    except requests.exceptions.JSONDecodeError:
+        st.error("Backend returned an invalid JSON response.")
+        st.stop()
+
+    except Exception as e:
+        st.error(f"Unexpected Error: {e}")
+        st.stop()
    
 df = load_jobs()
 
-logger.warning("A")
-
 df.index = df.index + 1
 
-logger.warning("B")
 
 location = st.sidebar.selectbox(
     "Select Location",
     ["All"] + sorted(df["location"].unique())
 )
 
-logger.warning("C")
 
 if location != "All":
     df = df[df["location"] == location]
 
-logger.warning("D")
 
 company = st.sidebar.selectbox(
     "Select Company",
     ["All"] + sorted(df["company_name"].dropna().unique())
 )
 
-logger.warning("E")
 
 if company != "All":
     df = df[df["company_name"] == company]
 
-logger.warning("F")
+
 
 job_role = st.sidebar.selectbox(
     "Select Job Role",
     ["All"] + sorted(df["job_roles"].unique())
 )
 
-logger.warning("G")
 
 if job_role != "All":
     df = df[df["job_roles"] == job_role]
-
-logger.warning("H")
 
 
 search = st.sidebar.text_input("Search Job Title")
