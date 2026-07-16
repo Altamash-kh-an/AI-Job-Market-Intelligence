@@ -12,23 +12,22 @@ def get_jobs():
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT * FROM pan_india_jobs")
+        cursor.execute("""
+            SELECT *
+            FROM pan_india_jobs
+            LIMIT 1000
+        """)
 
         columns = [desc[0] for desc in cursor.description]
-
         rows = cursor.fetchall()
 
-        jobs = []
-
-        for row in rows:
-            jobs.append(dict(zip(columns, row)))
+        jobs = [dict(zip(columns, row)) for row in rows]
 
         return jobs
 
     finally:
         cursor.close()
         conn.close()
-
 
 @router.get("/jobs/search")
 def search_jobs(location: str):
