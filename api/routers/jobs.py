@@ -15,7 +15,6 @@ def get_jobs():
         cursor.execute("""
             SELECT *
             FROM pan_india_jobs
-            LIMIT 1000
         """)
 
         columns = [desc[0] for desc in cursor.description]
