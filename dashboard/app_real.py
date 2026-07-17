@@ -61,44 +61,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-'''question = st.text_input(
-    "Ask AI",
-    placeholder="Example: Highest paying job in Bangalore",
-    label_visibility="collapsed"
-)
-if st.button("🚀 Ask AI", use_container_width=True):
-
-    if not question.strip():
-        st.warning("Please enter a question.")
-        st.stop()
-
-    with st.spinner("🤖 AI is analyzing..."):
-
-        try:
-            response = requests.post(
-                f"{API_URL}/ai/chat",
-                json={"question": question},
-                timeout=60
-            )
-
-            response.raise_for_status()
-
-            answer = response.json()
-
-            if "answer" in answer:
-                st.chat_message("assistant").write(answer["answer"])
-
-            elif "error" in answer:
-                st.error(answer["error"])
-
-            else:
-                st.write(answer)
-
-        except requests.exceptions.RequestException as e:
-            st.error(f"API Error: {e}")
-
-        except ValueError:
-            st.error("Invalid response received from API.")'''
 
 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -209,7 +171,7 @@ st.divider()
 
 
 st.subheader("PAN India Jobs Data")
-#st.dataframe(df)
+st.dataframe(df, use_container_width=True)
 
 
 
