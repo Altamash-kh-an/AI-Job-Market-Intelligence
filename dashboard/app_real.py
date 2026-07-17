@@ -61,7 +61,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-question = st.text_input(
+'''question = st.text_input(
     "Ask AI",
     placeholder="Example: Highest paying job in Bangalore",
     label_visibility="collapsed"
@@ -98,12 +98,19 @@ if st.button("🚀 Ask AI", use_container_width=True):
             st.error(f"API Error: {e}")
 
         except ValueError:
-            st.error("Invalid response received from API.")
+            st.error("Invalid response received from API.")'''
 
 st.markdown("</div>", unsafe_allow_html=True)
 
 
+question = st.text_input(
+    "Ask AI",
+    placeholder="Example: Highest paying job in Bangalore",
+    label_visibility="collapsed"
+)
 
+if st.button("🚀 Ask AI", use_container_width=True):
+    st.success("AI Disabled for Testing")
 
 
 
@@ -181,12 +188,12 @@ if job_role != "All":
 search = st.sidebar.text_input("Search Job Title")
 
 if search:
-    df = df[df["job_title"].str.contains(search, case=False)]
+    df = df[df["job_title"].str.contains(search, case=False, na=False)]
 
 
 st.sidebar.download_button(
     label="Download Filtered Data",
-    data=df.to_csv(index=False),
+    data=df.to_csv(index=False).encode("utf-8"),
     file_name="filtered_jobs.csv",
     mime="text/csv"
 )
