@@ -102,7 +102,7 @@ if st.button("🚀 Ask AI", width="stretch"):
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-@st.cache_data(ttl=300)
+
 def load_jobs():
 
     for attempt in range(3):
@@ -112,17 +112,7 @@ def load_jobs():
             timeout=60
         )
 
-        if response.status_code == 429:
-            st.write("429 RESPONSE:")
-            st.write(response.text)
-            st.write(dict(response.headers))
-
-            if attempt < 2:
-                time.sleep(5)
-                continue
-
-            st.error("Jobs API is temporarily busy. Please refresh the page.")
-            return pd.DataFrame()
+        
 
         response.raise_for_status()
 
