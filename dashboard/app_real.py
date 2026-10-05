@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import os
+import timeS
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -101,18 +102,30 @@ if st.button("🚀 Ask AI", width="stretch"):
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-
 @st.cache_data(ttl=300)
 def load_jobs():
 
-    response = requests.get(
-        f"{API_URL}/jobs",
-        timeout=60
-    )
+    for attempt in range(3):
 
-    response.raise_for_status()
+        response = requests.get(
+            f"{API_URL}/jobs",
+            timeout=60
+        )
 
-    return pd.DataFrame(response.json())
+        if response.status_code == 200:
+            return pd.DataFrame(response.json())
+
+        if response.status_code == 429:
+            if attempt < 2:
+                time.sleep(5)
+                continue
+
+            st.error("Jobs API is temporarily busy. Please refresh the page.")
+            return pd.DataFrame()
+
+        response.raise_for_status()
+
+    return pd.DataFrame()
 
 
 df = load_jobs()
