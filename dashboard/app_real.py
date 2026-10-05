@@ -103,20 +103,17 @@ if st.button("🚀 Ask AI", width="stretch"):
 st.markdown("</div>", unsafe_allow_html=True)
 
 
+@st.cache_data(ttl=300)
 def load_jobs():
 
-    for attempt in range(3):
+    response = requests.get(
+        f"{API_URL}/jobs",
+        timeout=60
+    )
 
-        response = requests.get(
-            f"{API_URL}/jobs",
-            timeout=60
-        )
+    response.raise_for_status()
 
-        
-
-        response.raise_for_status()
-
-    return pd.DataFrame()
+    return pd.DataFrame(response.json())
 
 
 df = load_jobs()
