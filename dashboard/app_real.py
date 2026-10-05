@@ -112,10 +112,11 @@ def load_jobs():
             timeout=60
         )
 
-        if response.status_code == 200:
-            return pd.DataFrame(response.json())
-
         if response.status_code == 429:
+            st.write("429 RESPONSE:")
+            st.write(response.text)
+            st.write(dict(response.headers))
+
             if attempt < 2:
                 time.sleep(5)
                 continue
