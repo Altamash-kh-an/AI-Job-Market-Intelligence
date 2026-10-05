@@ -50,7 +50,7 @@ footer {
 }
 
 header {
-    visibility: hidden;
+    visibility: visible !important;
 }
 
 
@@ -314,6 +314,75 @@ hr {
     color: #64748b;
     font-size: 12px;
     padding: 25px 0 5px 0;
+}
+
+/* ---------- RESPONSIVE MOBILE LAYOUT ---------- */
+
+@media (max-width: 768px) {
+
+    .block-container {
+        padding-top: 1rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .brand-title {
+        font-size: 25px !important;
+    }
+
+    .brand-subtitle {
+        font-size: 12px !important;
+    }
+
+    .ai-container {
+        padding: 22px 15px !important;
+        border-radius: 18px !important;
+        margin-top: 6px !important;
+    }
+
+    .ai-heading {
+        font-size: 21px !important;
+    }
+
+    .ai-description {
+        font-size: 12px !important;
+    }
+
+    .stTextInput > div > div > input {
+        font-size: 14px !important;
+    }
+
+    .metric-card {
+        padding: 13px !important;
+        min-height: 85px !important;
+    }
+
+    .metric-value {
+        font-size: 20px !important;
+    }
+
+    .metric-label {
+        font-size: 10px !important;
+    }
+
+    .section-title {
+        font-size: 18px !important;
+    }
+
+    [data-testid="stDataFrame"] {
+        font-size: 11px !important;
+    }
+
+    /* Keep the sidebar usable when opened on a phone. */
+    [data-testid="stSidebar"] {
+        min-width: 280px !important;
+        max-width: 85vw !important;
+    }
+
+    [data-testid="stSidebar"] .stButton > button {
+        min-height: 44px !important;
+        font-size: 13px !important;
+    }
 }
 
 </style>
