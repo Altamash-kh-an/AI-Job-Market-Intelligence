@@ -488,62 +488,27 @@ Top companies in Mumbai
 # LOAD JOBS
 # ============================================================
 
-@st.cache_data(ttl=300)
+st.cache_data(ttl=300)
 def load_jobs():
 
-    for attempt in range(3):
+    response = requests.get(
+        f"{API_URL}/jobs",
+        
+    )
 
-        try:
+    response.raise_for_status()
 
-            response = requests.get(
-                f"{API_URL}/jobs",
-                timeout=60
-            )
-
-            if response.status_code == 200:
-
-                return pd.DataFrame(
-                    response.json()
-                )
-
-            if response.status_code == 429:
-
-                if attempt < 2:
-
-                    time.sleep(5)
-                    continue
-
-                st.error(
-                    "Jobs API is temporarily busy. Please refresh the page."
-                )
-
-                return pd.DataFrame()
-
-            response.raise_for_status()
-
-        except Exception as e:
-
-            if attempt == 2:
-
-                st.error(f"Jobs API Error: {e}")
-
-                return pd.DataFrame()
-
-            time.sleep(3)
-
-    return pd.DataFrame()
+    return pd.DataFrame(response.json())
 
 
 df = load_jobs()
 
-
 if df.empty:
-
     st.warning("No jobs found.")
     st.stop()
 
-
 df.index = df.index + 1
+
 
 
 # ============================================================
