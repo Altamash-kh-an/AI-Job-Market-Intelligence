@@ -11,5 +11,3 @@ print("After Cleaning:", len(df))
 print(df)
 
 df.to_csv("data/cleaned_jobs.csv", index=False)
-
-df.to_csv("data/cleaned_job.csv")
