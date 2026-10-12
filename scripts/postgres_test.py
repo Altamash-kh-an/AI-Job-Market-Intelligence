@@ -1,30 +1,19 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-import psycopg2
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
-conn = psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        database=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD")
-    )
+from api.database import get_connection
 
-query = "SELECT * FROM jobs"
+conn = get_connection()
+try:
+    df = pd.read_sql("SELECT job_roles FROM pan_india_jobs", conn)
+finally:
+    conn.close()
 
-df = pd.read_sql(query, conn)
+job_roles = df["job_roles"].value_counts()
+job_roles.plot(kind="bar")
 
-skills = df["skill"].value_counts()
-
-skills.plot(kind="bar")
-
-plt.title("Top Skills")
-plt.xlabel("Skills")
+plt.title("Top Job Roles")
+plt.xlabel("Job Roles")
 plt.ylabel("Number of Jobs")
 
 plt.show()
-
-conn.close()

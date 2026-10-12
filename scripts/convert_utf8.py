@@ -2,14 +2,7 @@ import pandas as pd
 
 df = pd.read_csv(
     "data/cleaned_newdata.csv",
-    encoding="latin1"
-)
-
-df["Company Name"] = (
-    df["Company Name"]
-    .astype(str)
-    .str.encode("ascii", errors="ignore")
-    .str.decode("ascii")
+    encoding="utf-8"
 )
 
 df.to_csv(

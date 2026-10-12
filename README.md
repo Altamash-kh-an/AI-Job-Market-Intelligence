@@ -224,6 +224,13 @@ DELETE /jobs/{job_id}
 
 Deletes a job record from the database.
 
+All job write endpoints (`POST /jobs`, `PUT /jobs/{job_id}`, and
+`DELETE /jobs/{job_id}`) require an `Authorization: Bearer <token>` header.
+Configure the token as `API_WRITE_TOKEN` in the backend environment; if it is
+unset or empty, write requests fail closed with HTTP 503. Keep the token out of
+source control and browser-delivered dashboard code. Read endpoints do not
+require this token.
+
 ---
 
 #### AI Job Assistant
@@ -359,7 +366,8 @@ Successfully migrated:
 - Job IDs
 - 22,770 Job Records
 
-Now the application uses a cloud-hosted PostgreSQL database.
+This project history records a migration to Neon PostgreSQL. Current production
+connectivity is not verified by the local development setup below.
 
 ---
 
@@ -510,5 +518,95 @@ Interactive charts provide insights into the job market.
 # Author
 
 Md Altamash Khan
+
+## Local setup and configuration
+
+Use Python 3.11 or a compatible Python 3 version supported by the pinned
+dependencies. Copy `.env.example` to `.env` and replace the database placeholders
+with values for the database you intend to use. Keep `.env` out of Git.
+
+The API reads these database settings:
+
+| Variable | Purpose |
+| --- | --- |
+| `DB_HOST` | PostgreSQL host |
+| `DB_NAME` | Database name |
+| `DB_USER` | PostgreSQL role |
+| `DB_PASSWORD` | Database password; required for remote database connections |
+| `DB_PORT` | PostgreSQL port |
+| `DB_SSLMODE` | PostgreSQL SSL mode; defaults to `require` |
+
+Passwordless authentication is allowed only when `DB_HOST` is a loopback host
+and `DB_SSLMODE=disable`, for a local PostgreSQL cluster explicitly configured
+for trust authentication. Remote deployments must set `DB_PASSWORD` and retain
+`DB_SSLMODE=require`.
+
+The real Streamlit dashboard also requires `API_URL`, the base URL of the
+FastAPI service. For local development, set `API_URL=http://127.0.0.1:8000`.
+The dashboard validates this value and does not fall back to localhost when it
+is absent or invalid. In production, configure it to the deployed API service
+URL, not the dashboard's own URL or localhost.
+
+Create and activate a virtual environment, copy the example configuration,
+replace its placeholders, and install dependencies from the repository root:
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+if [ ! -e .env ]; then cp .env.example .env; fi
+python -m pip install -r requirements.txt
+```
+
+Run the local services from the repository root in separate terminals:
+
+```sh
+python -m uvicorn api.main:app --host 127.0.0.1 --port 8000
+```
+
+```sh
+streamlit run dashboard/app_real.py
+```
+
+Set `API_WRITE_TOKEN` in the backend environment to enable `POST`, `PUT`, and
+`DELETE` job endpoints. Keep it only on the backend; the dashboard does not
+need it. If it is missing, those endpoints fail closed with HTTP 503.
+
+Gemini is optional for API startup and ordinary job browsing. Configure
+`GEMINI_API_KEY` in the backend environment only when enabling `/ai/chat`.
+Without it, the AI endpoint returns HTTP 503. Never put this key in dashboard
+configuration.
+
+Run the existing unit tests with:
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+## Deployment boundaries and readiness
+
+The repository contains a FastAPI API and Streamlit dashboards; it does not
+contain a separate JavaScript frontend. Vercel does not natively run the
+existing Streamlit dashboard as a Streamlit service.
+
+For a Render API service, use a Python runtime and a start command that binds
+to Render's provided port, for example:
+
+```sh
+python -m uvicorn api.main:app --host 0.0.0.0 --port $PORT
+```
+
+Configure the API service's database variables (`DB_HOST`, `DB_NAME`,
+`DB_USER`, `DB_PASSWORD`, `DB_PORT`, and `DB_SSLMODE`) in Render's environment
+settings. Use a secure remote PostgreSQL connection with
+`DB_SSLMODE=require`. Configure `API_WRITE_TOKEN` and, if AI is enabled,
+`GEMINI_API_KEY` there as backend-only secrets.
+
+If deploying the Streamlit dashboard as a separate Render service, configure
+its `API_URL` to the public base URL of the deployed API. Do not use localhost
+for a separately hosted API/dashboard pair.
+
+The `/health` endpoint reports API process health only; it does not probe the
+database. Neon, Render, and other production connections have not been tested
+or verified by these local setup instructions.
 
 Python | Data Engineering | FastAPI | PostgreSQL | Streamlit | AI
