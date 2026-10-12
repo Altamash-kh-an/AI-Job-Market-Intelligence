@@ -3,8 +3,12 @@ import streamlit.components.v1 as components
 import requests
 import pandas as pd
 import os
-import time
 from dotenv import load_dotenv
+from dashboard.api_client import (
+    APIConfigurationError,
+    api_endpoint_url,
+    fetch_all_jobs,
+)
 
 load_dotenv()
 
@@ -440,23 +444,25 @@ with ask_col2:
                 try:
 
                     response = requests.post(
-                        f"{API_URL}/ai/chat",
+                        api_endpoint_url(API_URL, "ai/chat"),
                         json={"question": question},
-                        timeout=60
+                        timeout=60,
                     )
 
                     response.raise_for_status()
 
                     result = response.json()
 
-                    if "answer" in result:
+                    if not isinstance(result, dict):
+                        st.error("AI API returned an unexpected response.")
+                    elif isinstance(result.get("answer"), str):
 
                         st.chat_message(
                             "assistant",
                             avatar="🤖"
                         ).write(result["answer"])
 
-                    elif "error" in result:
+                    elif isinstance(result.get("error"), str):
 
                         st.error(result["error"])
 
@@ -464,9 +470,21 @@ with ask_col2:
 
                         st.write(result)
 
-                except Exception as e:
-
-                    st.error(f"Error : {e}")
+                except APIConfigurationError as e:
+                    st.error(str(e))
+                except requests.Timeout:
+                    st.error("AI API request timed out.")
+                except requests.ConnectionError:
+                    st.error("Cannot reach the configured API; check API_URL.")
+                except requests.HTTPError as e:
+                    status_code = (
+                        e.response.status_code if e.response is not None else "unknown"
+                    )
+                    st.error(f"AI API returned HTTP {status_code}.")
+                except ValueError:
+                    st.error("AI API returned invalid JSON.")
+                except requests.RequestException:
+                    st.error("AI API request failed.")
 
         else:
 
@@ -489,48 +507,13 @@ Top companies in Mumbai
 # ============================================================
 
 @st.cache_data(ttl=300)
-def load_jobs():
+def load_jobs(api_url):
+    page_size = 100
+    return pd.DataFrame(fetch_all_jobs(api_url, page_size=page_size))
 
-    last_error = None
-
-    for attempt in range(3):
-
-        try:
-            response = requests.get(
-                f"{API_URL}/jobs",
-                
-            )
-
-            if response.status_code == 200:
-
-                return pd.DataFrame(
-                    response.json()
-                )
-
-            if response.status_code == 429:
-
-                last_error = "Jobs API returned 429"
-
-                if attempt < 2:
-                    time.sleep(5)
-                    continue
-
-            response.raise_for_status()
-
-        except requests.RequestException as e:
-
-            last_error = str(e)
-
-            if attempt < 2:
-                time.sleep(5)
-                continue
-
-    raise RuntimeError(
-        f"Jobs API unavailable: {last_error}"
-    )
 try:
 
-    df = load_jobs()
+    df = load_jobs(API_URL)
 
 except Exception as e:
 
